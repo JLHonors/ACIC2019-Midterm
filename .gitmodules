@@ -1,0 +1,4 @@
+[submodule "sequenceserver-scale"]
+	path = sequenceserver-scale
+	url = https://github.com/zhxu73/sequenceserver-scale.git
+	branch = dev
