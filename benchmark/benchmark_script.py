@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 import sys
 import argparse
 import subprocess
@@ -170,7 +170,7 @@ def submit_job(url_str, seq, db_str, opt_str):
         post_param = "sequence=" + seq + '&' + db_str + '&' + opt_str
         # Submit job
         ts1 = time.time()
-        proc = subprocess.run(["curl", "-d", post_param, "-X", "POST", url_str, "-D", "/dev/stdout"], capture_output=True, check=True)
+        proc = subprocess.run(["curl", "-s", "-d", post_param, "-X", "POST", url_str, "-D", "/dev/stdout"], stdout=subprocess.PIPE, check=True)
         ts2 = time.time()
         resp_header_str = proc.stdout.decode("utf-8")
 
@@ -212,7 +212,7 @@ def request_result(jobid):
             result_json = ""
             req_count = 1
             while(len(result_json) == 0):
-                proc = subprocess.run(["curl", cmd_args.url + "/" + jobid + ".json"], capture_output=True, check=True)
+                proc = subprocess.run(["curl", "-s", cmd_args.url + "/" + jobid + ".json"], stdout=subprocess.PIPE, check=True)
                 result_json = proc.stdout.decode("utf-8")
                 if len(result_json) == 0:
                     req_count += 1
@@ -248,7 +248,7 @@ def one_search(url_str, seq, db_str, opt_str):
 #
 def list_databases():
     try:
-        proc = subprocess.run(["curl", cmd_args.url + "/searchdata.json"], capture_output=True, check=True)
+        proc = subprocess.run(["curl", "-s", cmd_args.url + "/searchdata.json"], stdout=subprocess.PIPE, check=True)
         json_str = proc.stdout.decode("utf-8")
         json_obj = json.loads(json_str)
     except subprocess.CalledProcessError:
