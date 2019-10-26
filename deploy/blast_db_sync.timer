@@ -1,0 +1,9 @@
+[Unit]
+Description=Sync the local copy of BLAST databases with the remote copy
+
+[Timer]
+OnUnitActiveSec=5min
+OnBootSec=10min
+
+[Install]
+WantedBy=timers.target

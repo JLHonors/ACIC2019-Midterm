@@ -1,0 +1,6 @@
+[Unit]
+Description=Sync the local copy of BLAST databases with the remote copy
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /var/www/sequenceserver/sync_blast_db.sh
