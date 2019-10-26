@@ -1,0 +1,14 @@
+[Unit]
+Description=Backend of the WorkQueue Application for running BLAST search
+After=nginx.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=app
+ExecStart=/usr/bin/blast_workqueue-backend
+
+[Install]
+Alias=blast_wq
