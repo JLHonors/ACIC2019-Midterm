@@ -7,8 +7,8 @@ StartLimitIntervalSec=0
 Type=simple
 Restart=always
 RestartSec=1
-User=app
+User=seqserver
 ExecStart=/usr/bin/blast_workqueue-backend
 
 [Install]
-Alias=blast_wq
+WantedBy=multi-user.target
