@@ -1,4 +1,6 @@
 [submodule "sequenceserver-scale"]
 	path = sequenceserver-scale
 	url = https://github.com/zhxu73/sequenceserver-scale.git
-	branch = master
+[submodule "blast-workqueue"]
+	path = blast-workqueue
+	url = https://github.com/zhxu73/blast-workqueue
