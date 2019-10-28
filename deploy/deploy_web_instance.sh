@@ -36,24 +36,23 @@ fi
 
 #
 # Update and Upgrade
-sudo apt-get update -y
-
+sudo apt-get -qq -y update
 
 #
 # Install our PGP key and add HTTPS support for APT
-sudo apt-get install -y dirmngr gnupg
+sudo apt-get -qq -y install dirmngr gnupg
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 561F9B9CAC40B2F7
-sudo apt-get install -y apt-transport-https ca-certificates
+sudo apt-get -qq -y install apt-transport-https ca-certificates
 
 #
 # Add our APT repository
 sudo sh -c 'echo deb https://oss-binaries.phusionpassenger.com/apt/passenger bionic main > /etc/apt/sources.list.d/passenger.list'
-sudo apt-get update
+sudo apt-get -qq -y update
 
 #
 # Install Passenger + Nginx module
 # https://www.phusionpassenger.com/library/install/standalone/install/oss/stretch/
-sudo apt-get install -y ruby ruby-dev nginx libnginx-mod-http-passenger redis-server build-essential zlib1g-dev curl wget git
+sudo apt-get -qq -y install ruby ruby-dev nginx libnginx-mod-http-passenger redis-server build-essential zlib1g-dev curl wget git
 
 #
 # Check passenger installation

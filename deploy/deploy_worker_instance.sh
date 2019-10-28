@@ -37,12 +37,12 @@ fi
 #
 #
 # Update & Upgrade
-sudo apt update -y
+sudo apt-get -qq -y update
 
 #
 #
 # Install with apt
-sudo apt install -y wget curl
+sudo apt-get -qq -y install wget curl
 
 #
 #
