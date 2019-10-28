@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 IRODS_USER=YOUR_USERNAME
 IRODS_PASS=YOUR_PASSWORD

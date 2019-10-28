@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 IRODS_USER=YOUR_USERNAME
 IRODS_PASS=YOUR_PASSWORD
@@ -21,15 +21,15 @@ if [ -z $SUDO_USER ]; then
     echo "Need to run the script as sudo"
     exit -1
 fi
-if [ $IRODS_USER == "YOUR_USERNAME" ]; then
+if [ "$IRODS_USER" == "YOUR_USERNAME" ]; then
     echo "Change IRODS_USER in script"
     exit -1
 fi
-if [ $IRODS_PASS == "YOUR_PASSWORD" ]; then
+if [ "$IRODS_PASS" == "YOUR_PASSWORD" ]; then
     echo "Change IRODS_PASS in script"
     exit -1
 fi
-if [ $MASTER_IP == "XX.XX.XX.XX" ]; then
+if [ "$MASTER_IP" == "XX.XX.XX.XX" ]; then
     echo "Change MASTER_IP in script"
     exit -1
 fi
