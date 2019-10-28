@@ -135,6 +135,13 @@ iinit < ~/password.txt
 irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 #
+# Setup iRODs seqserver
+sudo -u $SEQSERVER_USER -H mkdir /home/$SEQSERVER_USER/.irods
+sudo cp ~/.irods/irods_environment.json /home/$SEQSERVER_USER/.irods/
+sudo chown $SEQSERVER_USER: /home/$SEQSERVER_USER/.irods/irods_environment.json
+sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
+
+#
 # Install BLAST
 cd ~/
 curl ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.9.0+-x64-linux.tar.gz -O
@@ -202,7 +209,7 @@ sudo systemctl restart nginx
 echo "=================================================="
 sudo systemctl is-active nginx
 sudo systemctl is-active blast_db_sync.timer
-sudo systemctl is-active blast_db_sync.service
+#sudo systemctl is-active blast_db_sync.service
 sudo systemctl is-active blast_workqueue.service
 
 curl -Is localhost | grep "HTTP"
