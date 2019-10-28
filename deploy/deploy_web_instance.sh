@@ -38,6 +38,8 @@ if [ $IRODS_PASS == "YOUR_PASSWORD" ]; then
     exit -1
 fi
 
+DEBIAN_FRONTEND=noninteractive
+
 #
 # Update and Upgrade
 sudo apt-get -qq -y update
