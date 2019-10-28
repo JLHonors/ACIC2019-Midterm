@@ -11,11 +11,13 @@ IRODS_GROUP=iplant-everyone
 #
 #######################################################
 SEQSERVER_USER=seqserver
-SEQSERVER_GROUP=seqserver
+SEQSERVER_GROUP=seqserver_group
 
 SEQSERVER_BASE_PATH=/var/www/sequenceserver
 SEQSERVER_APP_PATH=/var/www/sequenceserver/app
+SEQSERVER_JOB_PATH=/var/www/sequenceserver/.sequenceserver
 SEQSERVER_CONFIG_PATH=/var/www/sequenceserver
+SEQSERVER_CONFIG_FILE=/var/www/sequenceserver/.sequenceserver.conf
 SEQSERVER_DB_PATH=/var/www/sequenceserver/db
 SEQSERVER_NUM_PROCESS=1
 
@@ -67,19 +69,26 @@ sudo gem install bundler
 sudo addgroup $SEQSERVER_GROUP
 sudo adduser --quiet --disabled-login --gecos 'SequenceServer' $SEQSERVER_USER
 sudo adduser $SEQSERVER_USER $SEQSERVER_GROUP
+sudo adduser $SUDO_USER $SEQSERVER_GROUP
+sudo adduser www-data $SEQSERVER_GROUP
 #sudo echo "DenyUsers $SEQSERVER_USER" >> /etc/ssh/sshd_config
 #sudo systemctl restart sshd
 
 #
 # Create necessary directory, and change owner
 sudo mkdir -p $SEQSERVER_BASE_PATH
+sudo mkdir -p $SEQSERVER_JOB_PATH
 sudo mkdir -p $SEQSERVER_APP_PATH
 sudo mkdir -p $SEQSERVER_CONFIG_PATH
 sudo mkdir -p $SEQSERVER_DB_PATH
 sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH
+sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_JOB_PATH
 sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_APP_PATH
 sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_CONFIG_PATH
 sudo chown -R $SEQSERVER_USER:$IRODS_GROUP $SEQSERVER_DB_PATH
+sudo chmod o-rwx $SEQSERVER_BASE_PATH
+sudo chmod -R o-w $SEQSERVER_APP_PATH
+sudo chmod -R o-w $SEQSERVER_DB_PATH
 
 #
 # Download SequenceServer
@@ -92,8 +101,9 @@ bundle install --path vendor/bundle --without development test
 
 #
 # Create config file
-cd $SEQSERVER_CONFIG_PATH
-curl https://raw.githubusercontent.com/JLHonors/ACIC2019-Midterm/master/deploy/.sequenceserver.conf > $SEQSERVER_CONFIG_PATH/.sequenceserver.conf
+cd ~/
+git clone https://github.com/JLHonors/ACIC2019-Midterm.git
+cp ACIC2019-Midterm/deploy/.sequenceserver.conf $SEQSERVER_CONFIG_FILE
 
 #
 # Download sample database
@@ -145,9 +155,7 @@ rm -rf ~/cctools
 
 #
 # Install Systemd Service
-cd ~/
-git clone https://github.com/JLHonors/ACIC2019-Midterm.git
-cd ACIC2019-Midterm/deploy
+cd ~/ACIC2019-Midterm/deploy
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
