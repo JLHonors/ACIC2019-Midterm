@@ -158,7 +158,9 @@ cd ~/ACIC2019-Midterm/deploy
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
-cp sync_blast_db.sh /var/www/sequenceserver
+cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
+sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
+sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo systemctl daemon-reload
 
 #

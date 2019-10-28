@@ -3,5 +3,6 @@ Description=Sync the local copy of BLAST databases with the remote copy
 
 [Service]
 Type=oneshot
+User=seqserver 
 ExecStart=/bin/bash /var/www/sequenceserver/sync_blast_db.sh
 
