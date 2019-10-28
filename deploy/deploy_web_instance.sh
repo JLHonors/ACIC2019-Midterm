@@ -195,4 +195,13 @@ sudo nginx -s reload
 # Start Nginx
 sudo systemctl restart nginx
 
+#
+# Check if service are active
+echo "=================================================="
+sudo systemctl is-active nginx
+sudo systemctl is-active blast_db_sync.timer
+sudo systemctl is-active blast_db_sync.service
+sudo systemctl is-active blast_workqueue.service
+
+curl -Is localhost | grep "HTTP"
 
