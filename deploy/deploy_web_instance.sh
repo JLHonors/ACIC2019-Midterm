@@ -155,6 +155,7 @@ rm -rf ~/cctools
 #
 # Install Systemd Service
 cd ~/ACIC2019-Midterm/deploy
+echo "User=$IRODS_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
