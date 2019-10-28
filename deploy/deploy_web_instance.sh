@@ -5,6 +5,9 @@ IRODS_PASS=YOUR_PASSWORD
 
 IRODS_GROUP=iplant-everyone
 
+# e.g. /iplant/home/your_username/db
+IRODS_SYNC_PATH=/iplant/home/$IRODS_USER/db
+
 #######################################################
 #
 # DO NOT Modify anything below this
@@ -19,6 +22,7 @@ SEQSERVER_JOB_PATH=/var/www/sequenceserver/.sequenceserver
 SEQSERVER_CONFIG_PATH=/var/www/sequenceserver
 SEQSERVER_CONFIG_FILE=/var/www/sequenceserver/.sequenceserver.conf
 SEQSERVER_DB_PATH=/var/www/sequenceserver/db
+SEQSERVER_SYNC_PATH_FILE=/var/www/sequenceserver/irods_sync_path.txt
 SEQSERVER_NUM_PROCESS=1
 
 if [ -z $SUDO_USER ]; then
@@ -84,7 +88,7 @@ sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH
 sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_JOB_PATH
 sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_APP_PATH
 sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_CONFIG_PATH
-sudo chown -R $SEQSERVER_USER:$IRODS_GROUP $SEQSERVER_DB_PATH
+sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_DB_PATH
 sudo chmod o-rwx $SEQSERVER_BASE_PATH
 sudo chmod -R o-w $SEQSERVER_APP_PATH
 sudo chmod -R o-w $SEQSERVER_DB_PATH
@@ -117,10 +121,16 @@ touch ~/password.txt
 chmod 600 ~/password.txt
 chown $SUDO_USER:root ~/password.txt
 echo $IRODS_PASS > ~/password.txt
+
+touch $SEQSERVER_SYNC_PATH_FILE
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_SYNC_PATH_FILE
+sudo chmod o-rwx $SEQSERVER_SYNC_PATH_FILE
+echo "$IRODS_SYNC_PATH" > $SEQSERVER_SYNC_PATH_FILE
+
 mkdir -p ~/.irods/
 echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > ~/.irods/irods_environment.json
 iinit < ~/password.txt
-irsync -r i:/iplant/home/$IRODS_USER/db /var/www/sequenceserver/db
+irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 #
 # Install BLAST
@@ -155,7 +165,7 @@ rm -rf ~/cctools
 #
 # Install Systemd Service
 cd ~/ACIC2019-Midterm/deploy
-echo "User=$IRODS_USER" >> blast_db_sync.service
+echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system

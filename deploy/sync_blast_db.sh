@@ -1,4 +1,5 @@
 #!/bin/env bash
 
-irsync -r i:/iplant/home/$USER/db /var/www/sequenceserver/db
+SYNC_PATH=$(cat /var/www/sequenceserver/irods_sync_path.txt)
+irsync -r i:SYNC_PATH /var/www/sequenceserver/db
 
