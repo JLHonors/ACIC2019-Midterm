@@ -11,6 +11,9 @@ LEAST_WORKERS=2
 CORE_PER_WORKER=2
 MEM_PER_WORKER=8
 
+# e.g. /iplant/home/your_username/db
+IRODS_SYNC_PATH=/iplant/home/$IRODS_USER/db
+
 IRODS_GROUP=iplant-everyone
 
 #######################################################
