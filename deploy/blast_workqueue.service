@@ -8,7 +8,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=seqserver
-ExecStart=/usr/bin/blast_workqueue-backend
+ExecStart=/usr/bin/blast_workqueue-backend /var/www/sequenceserver/wq_password.txt
 
 [Install]
 WantedBy=multi-user.target

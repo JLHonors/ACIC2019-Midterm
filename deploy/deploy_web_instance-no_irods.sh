@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
+
 #######################################################
 #
 # DO NOT Modify anything below this
@@ -17,9 +19,11 @@ SEQSERVER_DB_PATH=/var/www/sequenceserver/db
 SEQSERVER_SYNC_PATH_FILE=/var/www/sequenceserver/irods_sync_path.txt
 SEQSERVER_NUM_PROCESS=1
 
-if [ -z $SUDO_USER ]; then
-    echo "Need to run the script as sudo"
-    exit -1
+if [ $USER != "root" ]; then
+    if [ -z $SUDO_USER ]; then
+        echo "Need to run the script as sudo"
+        exit -1
+    fi
 fi
 
 DEBIAN_FRONTEND=noninteractive
@@ -58,7 +62,9 @@ sudo gem install bundler
 sudo addgroup $SEQSERVER_GROUP
 sudo adduser --quiet --disabled-login --gecos 'SequenceServer' $SEQSERVER_USER
 sudo adduser $SEQSERVER_USER $SEQSERVER_GROUP
-sudo adduser $SUDO_USER $SEQSERVER_GROUP
+if [ -z $SUDO_USER ]; then
+    sudo adduser $SUDO_USER $SEQSERVER_GROUP
+fi
 sudo adduser www-data $SEQSERVER_GROUP
 #sudo echo "DenyUsers $SEQSERVER_USER" >> /etc/ssh/sshd_config
 #sudo systemctl restart sshd
@@ -138,8 +144,12 @@ echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
+sudo touch $SEQSERVER_BASE_PATH/wq_password.txt
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/wq_password.txt
+sudo chmod 600 $SEQSERVER_BASE_PATH/wq_password.txt
+echo $WORKQUEUE_PASSWORD > $SEQSERVER_BASE_PATH/wq_password.txt
 cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
-sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo systemctl daemon-reload
 

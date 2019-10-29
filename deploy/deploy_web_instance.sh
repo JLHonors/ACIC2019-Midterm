@@ -1,9 +1,10 @@
 #!/bin/bash
 
-IRODS_USER=YOUR_USERNAME
+IRODS_USER=anonymous
 IRODS_PASS=YOUR_PASSWORD
 
 IRODS_GROUP=iplant-everyone
+WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
 
 # e.g. /iplant/home/your_username/db
 IRODS_SYNC_PATH=/iplant/home/$IRODS_USER/db
@@ -25,17 +26,21 @@ SEQSERVER_DB_PATH=/var/www/sequenceserver/db
 SEQSERVER_SYNC_PATH_FILE=/var/www/sequenceserver/irods_sync_path.txt
 SEQSERVER_NUM_PROCESS=1
 
-if [ -z $SUDO_USER ]; then
-    echo "Need to run the script as sudo"
-    exit -1
+if [ $USER != "root" ]; then
+    if [ -z $SUDO_USER ]; then
+        echo "Need to run the script as sudo"
+        exit -1
+    fi
 fi
-if [ $IRODS_USER == "YOUR_USERNAME" ]; then
-    echo "Change IRODS_USER in script"
-    exit -1
-fi
-if [ $IRODS_PASS == "YOUR_PASSWORD" ]; then
-    echo "Change IRODS_PASS in script"
-    exit -1
+if [ $IRODS_USER != "anonymous" ]; then
+    if [ $IRODS_USER == "YOUR_USERNAME" ]; then
+        echo "Change IRODS_USER in script"
+        exit -1
+    fi
+    if [ $IRODS_PASS == "YOUR_PASSWORD" ]; then
+        echo "Change IRODS_PASS in script"
+        exit -1
+    fi
 fi
 
 DEBIAN_FRONTEND=noninteractive
@@ -74,7 +79,9 @@ sudo gem install bundler
 sudo addgroup $SEQSERVER_GROUP
 sudo adduser --quiet --disabled-login --gecos 'SequenceServer' $SEQSERVER_USER
 sudo adduser $SEQSERVER_USER $SEQSERVER_GROUP
-sudo adduser $SUDO_USER $SEQSERVER_GROUP
+if [ -z $SUDO_USER ]; then
+    sudo adduser $SUDO_USER $SEQSERVER_GROUP
+fi
 sudo adduser www-data $SEQSERVER_GROUP
 #sudo echo "DenyUsers $SEQSERVER_USER" >> /etc/ssh/sshd_config
 #sudo systemctl restart sshd
@@ -122,7 +129,9 @@ rm ~/vector.tar.gz
 touch ~/password.txt
 chmod 600 ~/password.txt
 chown $SUDO_USER:root ~/password.txt
-echo $IRODS_PASS > ~/password.txt
+if [ $IRODS_USER != "anonymous" ]; then
+    echo $IRODS_PASS > ~/password.txt
+fi
 
 touch $SEQSERVER_SYNC_PATH_FILE
 sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_SYNC_PATH_FILE
@@ -131,8 +140,8 @@ echo "$IRODS_SYNC_PATH" > $SEQSERVER_SYNC_PATH_FILE
 
 mkdir -p ~/.irods/
 echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > ~/.irods/irods_environment.json
-iinit < ~/password.txt
-irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+#iinit < ~/password.txt
+#irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 #
 # Setup iRODs seqserver
@@ -140,6 +149,7 @@ sudo -u $SEQSERVER_USER -H mkdir /home/$SEQSERVER_USER/.irods
 sudo cp ~/.irods/irods_environment.json /home/$SEQSERVER_USER/.irods/
 sudo chown $SEQSERVER_USER: /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
+sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 #
 # Install BLAST
@@ -178,8 +188,12 @@ echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
+sudo touch $SEQSERVER_BASE_PATH/wq_password.txt
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/wq_password.txt
+sudo chmod 600 $SEQSERVER_BASE_PATH/wq_password.txt
+echo $WORKQUEUE_PASSWORD > $SEQSERVER_BASE_PATH/wq_password.txt
 cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
-sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo systemctl daemon-reload
 
