@@ -23,7 +23,7 @@ IRODS_GROUP=iplant-everyone
 #######################################################
 
 SEQSERVER_USER=seqserver
-SEQSERVER_GROUP=seqserver_grou
+SEQSERVER_GROUP=seqserver_group
 SEQSERVER_BASE_PATH=/var/www/sequenceserver
 SEQSERVER_DB_PATH=/var/www/sequenceserver/db
 SEQSERVER_SYNC_PATH_FILE=/var/www/sequenceserver/irods_sync_path.txt
@@ -68,9 +68,11 @@ fi
 #
 # Store IP of WQ master into file
 cd ~/
+mkdir -p $SEQSERVER_BASE_PATH
 touch $SEQSERVER_BASE_PATH/master_ip.txt
 chmod 640 $SEQSERVER_BASE_PATH/master_ip.txt
 echo $MASTER_IP > $SEQSERVER_BASE_PATH/master_ip.txt
+chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH
 
 #
 #
@@ -96,7 +98,7 @@ which blastn
 #
 # Create directory for database, and change owner to current user
 sudo mkdir -p /var/www/sequenceserver/db
-sudo chown $seqserver:$seqserver /var/www/sequenceserver/db
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP /var/www/sequenceserver/db
 
 #
 # Download sample database
