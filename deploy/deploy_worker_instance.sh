@@ -141,14 +141,18 @@ cd ~/ACIC2019-Midterm/deploy
 echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
+cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
+sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
+
 sudo cp spawn_wq_worker.service /etc/systemd/system
+sudo cp spawn_wq_worker.sh $SEQSERVER_BASE_PATH/spawn_wq_worker.sh
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/spawn_wq_worker.sh
 sudo touch $SEQSERVER_BASE_PATH/wq_password.txt
 sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/wq_password.txt
 sudo chmod 600 $SEQSERVER_BASE_PATH/wq_password.txt
 echo $WORKQUEUE_PASSWORD > $SEQSERVER_BASE_PATH/wq_password.txt
-cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
-sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
-sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
+
 sudo systemctl daemon-reload
 
 
