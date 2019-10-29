@@ -1,0 +1,14 @@
+[Unit]
+Description=Backend of the WorkQueue Application for running BLAST search
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=seqserver
+ExecStart=/bin/bash  /var/www/sequenceserver/spawn_wq_worker.sh
+
+[Install]
+WantedBy=multi-user.target
+
