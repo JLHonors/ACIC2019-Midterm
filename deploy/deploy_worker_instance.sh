@@ -133,6 +133,8 @@ sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 #
 # Launch systemd service
+cd ~/
+git clone https://github.com/JLHonors/ACIC2019-Midterm.git
 cd ~/ACIC2019-Midterm/deploy
 echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
