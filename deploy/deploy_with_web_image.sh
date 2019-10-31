@@ -55,6 +55,15 @@ echo $IRODS_SYNC_PATH > $SEQSERVER_SYNC_PATH_FILE
 iinit
 
 #
+# redis server
+cd ~/
+wget https://raw.githubusercontent.com/JLHonors/ACIC2019-Midterm/master/deploy/redis.service
+mv redis.service /etc/systemd/system
+sudo systemctl daemon-reload
+sudo systemctl enable redis.service
+sudo systemctl start redis.service
+
+#
 # Restart the service
 sudo systemctl restart blast_db_sync.service
 sudo systemctl restart blast_db_sync.timer
