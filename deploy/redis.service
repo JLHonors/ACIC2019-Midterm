@@ -1,0 +1,14 @@
+[Unit]
+Description=Redis Server
+After=nginx.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=seqserver
+ExecStart=/usr/bin/redis-server
+
+[Install]
+WantedBy=multi-user.target
