@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#######################################################
+#
+# Use with image version 0.1
+#
+########################################################
+
 WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
 IRODS_SYNC_PATH=/iplant/home/anonymous/db
 
@@ -47,4 +53,11 @@ echo $IRODS_SYNC_PATH > $SEQSERVER_SYNC_PATH_FILE
 #
 # Login as anonymous user
 iinit
+
+#
+# Restart the service
+sudo systemctl restart blast_db_sync.service
+sudo systemctl restart blast_db_sync.timer
+sudo systemctl restart blast_workqueue.service
+sudo systemctl restart nginx.service
 
