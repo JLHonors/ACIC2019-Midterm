@@ -15,6 +15,10 @@ import statistics
 # ./test_script_thread.py --url=localhost:4567 --len=100 --num=10 --db cdd_delta landmark
 # ./test_script_thread.py --url=localhost:4567 --len=100 --num=10 --seq-file=some_sequence.txt --db=cdd_delta
 #
+# Note curl seem to have some sort of upper limit of how long the post_param can be, so --len can not be infinitely large
+# --len: default 0, 0 means read entire file
+# --num: default 1
+# --seq-file: default sequence.txt
 #
 
 # copied from SequenceServer's default
@@ -53,7 +57,7 @@ def main():
 
     # Obtain a sequence of given length
     global seq_str
-    seq_str = read_seq_from_file("sequence.txt", cmd_args.len)
+    seq_str = read_seq_from_file(cmd_args.seq_file, cmd_args.len)
 
     # Use default option of the type of db
     global opt_str
@@ -124,9 +128,9 @@ def parse_args():
 
     # add long and short argument
     parser.add_argument("--url", "-u", required=True, help="URL of the SequenceServer instance")
-    parser.add_argument("--len", "-l", type=int, help="Length of the sequence")
+    parser.add_argument("--len", "-l", type=int, default=0, help="Length of the sequence")
     parser.add_argument("--num", "-n", type=int, default=1, help="Number of search submitted")
-    parser.add_argument("--seq-file", default="sequence.txt", dest="seq_file", help="File to extract search sequence from")
+    parser.add_argument("--seq-file", type=str, default="sequence.txt", dest="seq_file", help="File to extract search sequence from")
     parser.add_argument("--db", nargs='+', help="Names of databases")
     parser.add_argument("--verbose", action="store_true", help="Make output verbose")
     parser.add_argument("--list-dbs", action="store_true", dest="list_dbs", help="List the name of the databases available ons Server")
@@ -136,11 +140,8 @@ def parse_args():
     cmd_args = parser.parse_args()
 
     if not cmd_args.list_dbs:
-        if not cmd_args.len:
-            print("error: the following arguments are required: --url/-u, --len/-l, --db")
-            sys.exit(1)
         if not cmd_args.db:
-            print("error: the following arguments are required: --url/-u, --len/-l, --db")
+            print("error: the following arguments are required: --url/-u, --db")
             sys.exit(1)
 
 
@@ -149,11 +150,13 @@ def parse_args():
 # Read a sequence of given length from the file
 #
 #
-def read_seq_from_file(filename, length):
+def read_seq_from_file(filename, length = 0):
     seq = ""
     with open(filename, "r") as f:
         for line in f.readlines():
-            if len(seq) < length:
+            if length == 0:
+                seq = seq + line.strip()
+            elif len(seq) < length:
                 seq = seq + line.strip()
             else:
                 seq = seq[:length]
