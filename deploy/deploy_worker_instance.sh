@@ -1,20 +1,24 @@
 #!/bin/bash
 
+#######################################################
+# Must Change
+#######################################################
+MASTER_IP=XX.XX.XX.XX
+WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
+IRODS_SYNC_PATH=/iplant/home/your_username/db
+
+#######################################################
+# More Option
+#######################################################
+#MOST_WORKERS=4
+#LEAST_WORKERS=2
+#CORE_PER_WORKER=2
+#MEM_PER_WORKER=8
+
+ADMIN_USER=$ATMO_USER
+
 IRODS_USER=anonymous
 IRODS_PASS=YOUR_PASSWORD
-
-WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
-
-MASTER_IP=XX.XX.XX.XX
-MOST_WORKERS=4
-LEAST_WORKERS=2
-CORE_PER_WORKER=2
-MEM_PER_WORKER=8
-
-# e.g. /iplant/home/your_username/db
-IRODS_SYNC_PATH=/iplant/home/$IRODS_USER/db
-
-IRODS_GROUP=iplant-everyone
 
 #######################################################
 #
@@ -34,6 +38,15 @@ if [ $USER != "root" ]; then
         exit -1
     fi
 fi
+if [ $MASTER_IP == "XX.XX.XX.XX" ]; then
+    echo "Change MASTER_IP in script"
+    exit -1
+fi
+if [ WORKQUEUE_PASSWORD == VERY_VERY_VERY_STRONG_PASSWORD ]; then
+    echo "Change WORKQUEUE_PASSWORD in script"
+    exit -1
+fi
+
 if [ $IRODS_USER != "anonymous" ]; then
     if [ $IRODS_USER == "YOUR_USERNAME" ]; then
         echo "Change IRODS_USER in script"
@@ -60,8 +73,11 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install wget curl
 sudo addgroup $SEQSERVER_GROUP
 sudo adduser --quiet --disabled-login --gecos 'SequenceServer' $SEQSERVER_USER
 sudo adduser $SEQSERVER_USER $SEQSERVER_GROUP
-if [ -z $SUDO_USER ]; then
+if [ -n $SUDO_USER ]; then
     sudo adduser $SUDO_USER $SEQSERVER_GROUP
+fi
+if [ -n $SUDO_USER ]; then
+    sudo adduser $ADMIN_USER $SEQSERVER_GROUP
 fi
 
 #
@@ -134,17 +150,19 @@ sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
 sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 #
-# Launch systemd service
+# Launch systemd service - db sync
 cd ~/
 git clone https://github.com/JLHonors/ACIC2019-Midterm.git
 cd ~/ACIC2019-Midterm/deploy
-echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
 sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
 
+#
+# Launch systemd service - spwan worker
+cd ~/ACIC2019-Midterm/deploy
 sudo cp spawn_wq_worker.service /etc/systemd/system
 sudo cp spawn_wq_worker.sh $SEQSERVER_BASE_PATH/spawn_wq_worker.sh
 sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/spawn_wq_worker.sh
@@ -162,4 +180,9 @@ sudo systemctl enable blast_db_sync.timer
 sudo systemctl start blast_db_sync.timer
 sudo systemctl enable spawn_wq_worker.service
 sudo systemctl start spawn_wq_worker.service
-#work_queue_factory $MASTER_IP 9123 -T wq -w $LEAST_WORKERS -W $MOST_WORKERS --cores=$CORE_PER_WORKER --memory=$MEM_PER_WORKER
+
+#
+#
+sudo systemctl is-active blast_db_sync.timer
+sudo systemctl is-active spawn_wq_worker.service > status
+

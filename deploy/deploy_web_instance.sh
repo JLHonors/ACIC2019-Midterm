@@ -1,13 +1,19 @@
 #!/bin/bash
 
+
+#######################################################
+# Must Change
+#######################################################
+WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
+IRODS_SYNC_PATH=/iplant/home/your_username/db
+
+#######################################################
+# More Option
+#######################################################
+ADMIN_USER=$ATMO_USER
+
 IRODS_USER=anonymous
 IRODS_PASS=YOUR_PASSWORD
-
-IRODS_GROUP=iplant-everyone
-WORKQUEUE_PASSWORD=VERY_VERY_VERY_STRONG_PASSWORD
-
-# e.g. /iplant/home/your_username/db
-IRODS_SYNC_PATH=/iplant/home/$IRODS_USER/db
 
 #######################################################
 #
@@ -79,8 +85,11 @@ sudo gem install bundler
 sudo addgroup $SEQSERVER_GROUP
 sudo adduser --quiet --disabled-login --gecos 'SequenceServer' $SEQSERVER_USER
 sudo adduser $SEQSERVER_USER $SEQSERVER_GROUP
-if [ -z $SUDO_USER ]; then
+if [ -n $SUDO_USER ]; then
     sudo adduser $SUDO_USER $SEQSERVER_GROUP
+fi
+if [ -n $ADMIN_USER ]; then
+    sudo adduser $ADMIN_USER $SEQSERVER_GROUP
 fi
 sudo adduser www-data $SEQSERVER_GROUP
 #sudo echo "DenyUsers $SEQSERVER_USER" >> /etc/ssh/sshd_config
@@ -184,7 +193,6 @@ rm -rf ~/cctools
 #
 # Install Systemd Service
 cd ~/ACIC2019-Midterm/deploy
-echo "User=$SEQSERVER_USER" >> blast_db_sync.service
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
