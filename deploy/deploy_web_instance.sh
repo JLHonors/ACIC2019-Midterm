@@ -147,18 +147,15 @@ sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_SYNC_PATH_FILE
 sudo chmod o-rwx $SEQSERVER_SYNC_PATH_FILE
 echo "$IRODS_SYNC_PATH" > $SEQSERVER_SYNC_PATH_FILE
 
-mkdir -p ~/.irods/
-echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > ~/.irods/irods_environment.json
-#iinit < ~/password.txt
-#irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
-
 #
 # Setup iRODs seqserver
 sudo -u $SEQSERVER_USER -H mkdir /home/$SEQSERVER_USER/.irods
-sudo cp ~/.irods/irods_environment.json /home/$SEQSERVER_USER/.irods/
+echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo chown $SEQSERVER_USER: /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
 sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+
 
 #
 # Install BLAST

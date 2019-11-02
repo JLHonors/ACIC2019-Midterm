@@ -69,6 +69,16 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y update
 sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install wget curl
 
 #
+# Install iRODs - icommand (if not installed)
+command -v iinit
+if [ $? != 0 ]; then
+    wget -qO - https://packages.irods.org/irods-signing-key.asc | sudo apt-key add -
+    echo "deb [arch=amd64] https://packages.irods.org/apt/ xenial main" | sudo tee /etc/apt/sources.list.d/renci-irods.list
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install irods-icommands
+fi
+
+#
 # Create user
 sudo addgroup $SEQSERVER_GROUP
 sudo adduser --quiet --disabled-login --gecos 'SequenceServer' $SEQSERVER_USER
@@ -123,6 +133,8 @@ curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/vector.tar.gz -O
 sudo tar -xvf vector.tar.gz -C $SEQSERVER_DB_PATH/
 rm ~/vector.tar.gz
 
+
+
 #
 #
 # Setup iRODs
@@ -138,16 +150,15 @@ sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_SYNC_PATH_FILE
 sudo chmod o-rwx $SEQSERVER_SYNC_PATH_FILE
 echo "$IRODS_SYNC_PATH" > $SEQSERVER_SYNC_PATH_FILE
 
-mkdir -p ~/.irods/
-echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > ~/.irods/irods_environment.json
-
 #
 # Setup iRODs seqserver
 sudo -u $SEQSERVER_USER -H mkdir /home/$SEQSERVER_USER/.irods
-sudo cp ~/.irods/irods_environment.json /home/$SEQSERVER_USER/.irods/
+echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo chown $SEQSERVER_USER: /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
 sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+
 
 #
 # Launch systemd service - db sync
