@@ -75,6 +75,15 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install build-essential nginx
 # Check passenger installation
 sudo /usr/bin/passenger-config validate-install --auto
 
+#
+# Install iRODs - icommand (if not installed)
+command -v iinit
+if [ $? != 0 ]; then
+    wget -qO - https://packages.irods.org/irods-signing-key.asc | sudo apt-key add -
+    echo "deb [arch=amd64] https://packages.irods.org/apt/ xenial main" | sudo tee /etc/apt/sources.list.d/renci-irods.list
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install irods-icommands
+fi
 
 #
 # Install bundler
