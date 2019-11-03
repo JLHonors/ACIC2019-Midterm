@@ -202,22 +202,17 @@ cd ~/ACIC2019-Midterm/deploy
 sudo cp blast_db_sync.service /etc/systemd/system
 sudo cp blast_db_sync.timer /etc/systemd/system
 sudo cp blast_workqueue.service /etc/systemd/system
+sudo cp redis.service /etc/systemd/system
+
 sudo touch $SEQSERVER_BASE_PATH/wq_password.txt
 sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/wq_password.txt
 sudo chmod 600 $SEQSERVER_BASE_PATH/wq_password.txt
 echo $WORKQUEUE_PASSWORD > $SEQSERVER_BASE_PATH/wq_password.txt
+
 cp sync_blast_db.sh $SEQSERVER_BASE_PATH/
 sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo chmod 750 $SEQSERVER_BASE_PATH/sync_blast_db.sh
 sudo systemctl daemon-reload
-
-#
-# Start DB sync service and WQ backend service
-sudo systemctl enable blast_db_sync.timer
-sudo systemctl start blast_db_sync.timer
-sudo systemctl enable blast_workqueue.service
-sudo systemctl start blast_workqueue.service
-
 
 #
 # Nginx Config
@@ -229,8 +224,15 @@ sudo rm /etc/nginx/sites-enabled/default
 sudo nginx -s reload
 
 #
-# Start Nginx
-sudo systemctl restart nginx
+# Start the service
+sudo systemctl enable blast_db_sync.timer
+sudo systemctl enable blast_workqueue.service
+sudo systemctl enable nginx.service
+sudo systemctl enable redis.service
+sudo systemctl restart blast_db_sync.timer
+sudo systemctl restart blast_workqueue.service
+sudo systemctl restart nginx.service
+sudo systemctl restart redis.service
 
 #
 # Check if service are active
