@@ -190,8 +190,7 @@ cd ~/
 git clone https://github.com/zhxu73/blast-workqueue.git
 cd blast-workqueue/src
 make
-sudo cp blast_workqueue /usr/bin
-sudo cp blast_workqueue-backend /usr/bin
+sudo make install
 cd ~/
 rm -rf ~/blast-workqueue
 rm -rf ~/cctools
