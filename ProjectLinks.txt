@@ -1,0 +1,8 @@
+Instructions for Deployment on Atmosphere
+  https://wiki.cyverse.org/wiki/pages/viewpage.action?pageId=47120572
+
+Presentation:
+  https://docs.google.com/presentation/d/1N4rmoBT6RG1AZNsyB15YxBZxqXxvv28Ia0xAm68khao/edit#slide=id.p
+
+Group Report:
+  https://docs.google.com/document/d/1kYaIZ6tfhz8f-kAj_qT69-vgjBsJAmIjgRdK4LZ6kWc/edit?usp=sharing
