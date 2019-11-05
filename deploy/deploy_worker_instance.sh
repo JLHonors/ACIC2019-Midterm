@@ -182,6 +182,10 @@ sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH/wq_password.txt
 sudo chmod 600 $SEQSERVER_BASE_PATH/wq_password.txt
 echo $WORKQUEUE_PASSWORD > $SEQSERVER_BASE_PATH/wq_password.txt
 
+#
+# Change Owner of base path
+sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH
+
 sudo systemctl daemon-reload
 
 

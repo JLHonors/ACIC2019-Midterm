@@ -197,6 +197,10 @@ rm -rf ~/blast-workqueue
 rm -rf ~/cctools
 
 #
+# Change Owner of base path
+sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_BASE_PATH
+
+#
 # Install Systemd Service
 cd ~/ACIC2019-Midterm/deploy
 sudo cp blast_db_sync.service /etc/systemd/system
