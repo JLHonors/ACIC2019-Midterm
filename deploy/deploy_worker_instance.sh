@@ -66,7 +66,22 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y update
 #
 #
 # Install with apt
-sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install wget curl
+sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install wget curl nginx
+
+#
+# Progress Update through web page
+INDEX_PAGE_FILENAME=/var/www/html/index.html
+INDEX_PAGE_CONTENT="<!DOCTYPE html><html><body>\n</body></html>"
+rm /var/www/html/*.html
+echo -e $INDEX_PAGE_CONTENT > $INDEX_PAGE_FILENAME
+sudo nginx -s reload
+sudo systemctl restart nginx
+function update_index_page
+{
+    sed -i '$d' $INDEX_PAGE_FILENAME
+    echo -e "<div>$1</div>\n" >> $INDEX_PAGE_FILENAME
+    echo "</body></html>" >> $INDEX_PAGE_FILENAME
+}
 
 #
 # Install iRODs - icommand (if not installed)
@@ -76,6 +91,7 @@ if [ $? != 0 ]; then
     echo "deb [arch=amd64] https://packages.irods.org/apt/ xenial main" | sudo tee /etc/apt/sources.list.d/renci-irods.list
     sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install irods-icommands
+    update_index_page "Installed iRODs"
 fi
 
 #
@@ -89,6 +105,7 @@ fi
 if [ -n $SUDO_USER ]; then
     sudo adduser $ADMIN_USER $SEQSERVER_GROUP
 fi
+update_index_page "Created Limit User"
 
 #
 #
@@ -109,6 +126,7 @@ tar -xvf cctools-7.0.19-x86_64-centos7.tar.gz
 sudo cp cctools-7.0.19-x86_64-centos7/bin/* /usr/bin/
 rm cctools-7.0.19-x86_64-centos7.tar.gz
 which work_queue_worker
+update_index_page "Installed cctools (WorkQueue)"
 
 #
 #
@@ -119,6 +137,7 @@ tar -xvf ncbi-blast-2.9.0+-x64-linux.tar.gz
 sudo cp ncbi-blast-2.9.0+/bin/* /usr/bin/
 rm ncbi-blast-2.9.0+-x64-linux.tar.gz
 which blastn
+update_index_page "Installed BLAST+"
 
 #
 #
@@ -132,7 +151,7 @@ cd ~/
 curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/vector.tar.gz -O
 sudo tar -xvf vector.tar.gz -C $SEQSERVER_DB_PATH/
 rm ~/vector.tar.gz
-
+update_index_page "Download Sample Database"
 
 
 #
@@ -156,8 +175,12 @@ sudo -u $SEQSERVER_USER -H mkdir /home/$SEQSERVER_USER/.irods
 echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo chown $SEQSERVER_USER: /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
-sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
-irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+update_index_page "iinit"
+update_index_page "Starting sync with remote collection of databases"
+update_index_page "$(sudo -u $SEQSERVER_USER -H irsync -rsl i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH)"
+sudo -u $SEQSERVER_USER -H irsync -rKv i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+update_index_page "Finished sync with remote collection of databases"
+#irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 
 #
@@ -198,6 +221,13 @@ sudo systemctl start spawn_wq_worker.service
 
 #
 #
-sudo systemctl is-active blast_db_sync.timer
-sudo systemctl is-active spawn_wq_worker.service > status
+SYNC_STATUS=$(sudo systemctl is-active blast_db_sync.timer)
+WORKER_STATUS=$(sudo systemctl is-active spawn_wq_worker.service)
+
+if [ $SYNC_STATUS == "active" || $WORKER_STATUS == "active" ]; then
+    sudo systemctl stop nginx
+else
+    update_index_page "blast_db_sync.timer: $SYNC_STATUS"
+    update_index_page "spawn_wq_worker.service: $WORKER_STATUS"
+fi
 

@@ -76,6 +76,21 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install build-essential nginx
 sudo /usr/bin/passenger-config validate-install --auto
 
 #
+# Progress Update through web page
+INDEX_PAGE_FILENAME=/var/www/html/index.html
+INDEX_PAGE_CONTENT="<!DOCTYPE html><html><body>\n</body></html>"
+rm /var/www/html/*.html
+echo -e $INDEX_PAGE_CONTENT > $INDEX_PAGE_FILENAME
+sudo nginx -s reload
+sudo systemctl restart nginx
+function update_index_page
+{
+    sed -i '$d' $INDEX_PAGE_FILENAME
+    echo -e "<div>$1</div>\n" >> $INDEX_PAGE_FILENAME
+    echo "</body></html>" >> $INDEX_PAGE_FILENAME
+}
+
+#
 # Install iRODs - icommand (if not installed)
 command -v iinit
 if [ $? != 0 ]; then
@@ -83,11 +98,13 @@ if [ $? != 0 ]; then
     echo "deb [arch=amd64] https://packages.irods.org/apt/ xenial main" | sudo tee /etc/apt/sources.list.d/renci-irods.list
     sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -qq -y install irods-icommands
+    update_index_page "Installed iRODs"
 fi
 
 #
 # Install bundler
 sudo gem install bundler
+update_index_page "Installed bundler"
 
 #
 # Create user
@@ -103,6 +120,7 @@ fi
 sudo adduser www-data $SEQSERVER_GROUP
 #sudo echo "DenyUsers $SEQSERVER_USER" >> /etc/ssh/sshd_config
 #sudo systemctl restart sshd
+update_index_page "Created Limit User"
 
 #
 # Create necessary directory, and change owner
@@ -119,21 +137,25 @@ sudo chown -R $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_DB_PATH
 sudo chmod o-rwx $SEQSERVER_BASE_PATH
 sudo chmod -R o-w $SEQSERVER_APP_PATH
 sudo chmod -R o-w $SEQSERVER_DB_PATH
+update_index_page "Created Necessary Path"
 
 #
 # Download SequenceServer
 git clone https://github.com/zhxu73/sequenceserver-scale.git $SEQSERVER_APP_PATH
+update_index_page "git clone sequenceserver-scale"
 
 #
 # Install the dependencies of SequenceServer
 cd $SEQSERVER_APP_PATH
 bundle install --path vendor/bundle --without development test
+update_index_page "bundle install"
 
 #
 # Create config file
 cd ~/
 git clone https://github.com/JLHonors/ACIC2019-Midterm.git
 cp ACIC2019-Midterm/deploy/.sequenceserver.conf $SEQSERVER_CONFIG_FILE
+update_index_page "Nginx config file"
 
 #
 # Download sample database
@@ -141,6 +163,7 @@ cd ~/
 curl ftp://ftp.ncbi.nlm.nih.gov/blast/db/vector.tar.gz -O
 sudo tar -xvf vector.tar.gz -C $SEQSERVER_DB_PATH/
 rm ~/vector.tar.gz
+update_index_page "Download sample database"
 
 #
 # Setup iRODs
@@ -162,8 +185,12 @@ sudo -u $SEQSERVER_USER -H mkdir /home/$SEQSERVER_USER/.irods
 echo "{ \"irods_zone_name\": \"iplant\", \"irods_host\": \"data.cyverse.org\", \"irods_port\": 1247, \"irods_user_name\": \"$IRODS_USER\" }" > /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo chown $SEQSERVER_USER: /home/$SEQSERVER_USER/.irods/irods_environment.json
 sudo -u $SEQSERVER_USER -H iinit < ~/password.txt
-sudo -u $SEQSERVER_USER -H irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
-irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+update_index_page "iinit"
+update_index_page "Starting sync with remote collection of databases"
+update_index_page "$(sudo -u $SEQSERVER_USER -H irsync -rsl i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH)"
+sudo -u $SEQSERVER_USER -H irsync -rKv i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
+update_index_page "Finished sync with remote collection of databases"
+#irsync -r i:$IRODS_SYNC_PATH $SEQSERVER_DB_PATH
 
 
 #
@@ -174,6 +201,7 @@ tar -xvf ncbi-blast-2.9.0+-x64-linux.tar.gz
 sudo cp ncbi-blast-2.9.0+/bin/* /usr/bin
 rm ~/ncbi-blast-2.9.0+-x64-linux.tar.gz
 rm -rf ~/ncbi-blast-2.9.0+
+update_index_page "Installed BLAST+"
 
 #
 # Install cctools (WorkQueue)
@@ -183,6 +211,7 @@ tar -xvf cctools-7.0.19-x86_64-centos7.tar.gz
 mv cctools-7.0.19-x86_64-centos7 cctools
 sudo cp cctools/bin/* /usr/bin
 rm cctools-7.0.19-x86_64-centos7.tar.gz
+update_index_page "Installed cctools"
 
 #
 # Install blast-workqueue
@@ -194,6 +223,9 @@ sudo make install
 cd ~/
 rm -rf ~/blast-workqueue
 rm -rf ~/cctools
+update_index_page $(command -v blast_workqueue)
+update_index_page $(command -v blast_workqueue-backend)
+update_index_page "Installed blast-workqueue"
 
 #
 # Change Owner of base path
