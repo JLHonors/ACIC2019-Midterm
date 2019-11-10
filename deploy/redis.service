@@ -8,6 +8,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=seqserver
+WorkingDirectory=/var/www/sequenceserver
 ExecStart=/usr/bin/redis-server
 
 [Install]
