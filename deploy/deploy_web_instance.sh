@@ -28,7 +28,7 @@ SEQSERVER_APP_PATH=/var/www/sequenceserver/app
 SEQSERVER_JOB_PATH=/var/www/sequenceserver/.sequenceserver
 SEQSERVER_CONFIG_PATH=/var/www/sequenceserver
 SEQSERVER_CONFIG_FILE=/var/www/sequenceserver/.sequenceserver.conf
-SEQSERVER_DB_PATH=/var/www/sequenceserver/db
+SEQSERVER_DB_PATH=/scratch
 SEQSERVER_SYNC_PATH_FILE=/var/www/sequenceserver/irods_sync_path.txt
 SEQSERVER_NUM_PROCESS=1
 
@@ -155,6 +155,7 @@ update_index_page "bundle install"
 cd ~/
 git clone https://github.com/JLHonors/ACIC2019-Midterm.git
 cp ACIC2019-Midterm/deploy/.sequenceserver.conf $SEQSERVER_CONFIG_FILE
+echo -e ":database_dir: \"$SEQSERVER_DB_PATH\"" >> $SEQSERVER_CONFIG_FILE
 update_index_page "Nginx config file"
 
 #

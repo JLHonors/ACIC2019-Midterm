@@ -29,7 +29,7 @@ IRODS_PASS=YOUR_PASSWORD
 SEQSERVER_USER=seqserver
 SEQSERVER_GROUP=seqserver_group
 SEQSERVER_BASE_PATH=/var/www/sequenceserver
-SEQSERVER_DB_PATH=/var/www/sequenceserver/db
+SEQSERVER_DB_PATH=/scratch
 SEQSERVER_SYNC_PATH_FILE=/var/www/sequenceserver/irods_sync_path.txt
 
 if [ $USER != "root" ]; then
@@ -142,8 +142,8 @@ update_index_page "Installed BLAST+"
 #
 #
 # Create directory for database, and change owner to current user
-sudo mkdir -p /var/www/sequenceserver/db
-sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP /var/www/sequenceserver/db
+sudo mkdir -p $SEQSERVER_DB_PATH
+sudo chown $SEQSERVER_USER:$SEQSERVER_GROUP $SEQSERVER_DB_PATH
 
 #
 # Download sample database
